@@ -43,9 +43,9 @@ async function removeNote(id) {
 }
 
 async function updateNote(id, newTitle) {
+  console.log('id', id)
   const notes = await getNotes()
   const changedNote = notes.map(note => {
-    console.log('note', note)
     if(note.id === id) {
       note.title = newTitle
       return note
