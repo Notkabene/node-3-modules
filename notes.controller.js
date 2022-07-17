@@ -1,6 +1,7 @@
 const fs = require('fs/promises')
 const path = require('path')
 const chalk = require('chalk')
+
 const notesPath = path.join(__dirname, 'db.json')
 
 async function addNote(title) {
@@ -12,8 +13,8 @@ async function addNote(title) {
 
   notes.push(note)
 
-  await fs.writeFile(notesPath, JSON.stringify(notes))
-  console.log(chalk.bgGreen('Note was add'))
+  await saveNotes(notes)
+  console.log(chalk.bgGreen('Note was added!'))
 }
 
 async function getNotes() {
@@ -21,20 +22,41 @@ async function getNotes() {
   return Array.isArray(JSON.parse(notes)) ? JSON.parse(notes) : []
 }
 
-async function removeNote(id) {
-  const notes = await getNotes()
-  const newNotes = notes.filter(note => note.id !== id)
-  await fs.writeFile(notesPath, JSON.stringify(newNotes))
+async function saveNotes(notes) {
+  await fs.writeFile(notesPath, JSON.stringify(notes))
 }
 
-async function printNotesList() {
+async function printNotes() {
   const notes = await getNotes()
+
   console.log(chalk.bgBlue('Here is the list of notes:'))
   notes.forEach(note => {
-    console.log('title', chalk.blue(note.title), 'id', chalk.yellow(note.id))
+    console.log(chalk.bgWhite(note.id), chalk.blue(note.title))
   })
 }
 
+async function removeNote(id) {
+  const notes = await getNotes()
+  const filtered = notes.filter(note => note.id !== id)
+  await saveNotes(filtered)
+  console.log(chalk.red(`Note with id="${id}" has been removed.`))
+}
+
+async function updateNote(id, newTitle) {
+  const notes = await getNotes()
+  const changedNote = notes.map(note => {
+    console.log('note', note)
+    if(note.id === id) {
+      note.title = newTitle
+      return note
+    }
+    return note
+  })
+  console.log("changedNote", changedNote)
+  await saveNotes(changedNote)
+  console.log(chalk.yellow(`Note with id="${id}" has been updated.`))
+}
+
 module.exports = {
-  addNote, printNotesList, removeNote
+  addNote, getNotes, removeNote, updateNote
 }
